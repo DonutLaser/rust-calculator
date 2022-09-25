@@ -30,14 +30,9 @@ fn main() {
             break;
         }
 
-        match lexer::tokenize(&input) {
-            Ok(tokens) => {
-                // lexer::dump(&tokens);
-
-                let result = eval::eval(tokens);
-                println!("{}", result);
-            }
-            Err(err) => println!("{}", err),
-        };
+        if let Some(tokens) = lexer::tokenize(&input) {
+            let result = eval::eval(tokens);
+            println!("{}", result);
+        }
     }
 }

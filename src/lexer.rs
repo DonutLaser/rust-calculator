@@ -4,8 +4,8 @@ pub enum Token {
     Operator(char),
 }
 
-pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
-    let mut result: Result<Vec<Token>, &str> = Result::Err("");
+pub fn tokenize(input: &str) -> Option<Vec<Token>> {
+    let mut result: Option<Vec<Token>> = Option::None;
     let mut tokens: Vec<Token> = Vec::new();
 
     let chars: Vec<char> = input.chars().collect();
@@ -19,7 +19,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
             continue;
         }
 
-        if char.is_digit(10) {
+        if char.is_digit(10) || *char == '.' {
             let mut number = String::new();
 
             let mut next_char = chars.get(index).unwrap();
@@ -33,12 +33,18 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
                 };
             }
 
-            let n = number.parse::<f32>().unwrap();
-            tokens.push(Token::Number(n));
+            match number.parse::<f32>() {
+                Ok(n) => tokens.push(Token::Number(n)),
+                Err(err) => {
+                    eprintln!("Error: {}", err);
+                    error = true;
+                    break;
+                }
+            }
         } else if *char == '+' || *char == '-' || *char == '*' || *char == '/' || *char == '^' {
             tokens.push(Token::Operator(*char));
         } else {
-            result = Result::Err("Unknown character encountered");
+            eprintln!("Error: unknown character encountered");
             error = true;
             break;
         }
@@ -47,7 +53,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
     }
 
     if !error {
-        result = Result::Ok(tokens);
+        result = Option::Some(tokens);
     }
 
     result

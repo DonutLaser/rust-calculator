@@ -1,6 +1,6 @@
 #[derive(Debug)]
 pub enum Token {
-    Number(u32),
+    Number(f32),
     Operator(char),
 }
 
@@ -23,7 +23,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
             let mut number = String::new();
 
             let mut next_char = chars.get(index).unwrap();
-            while next_char.is_digit(10) {
+            while next_char.is_digit(10) || *next_char == '.' {
                 number.push(*next_char);
 
                 index += 1;
@@ -33,7 +33,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
                 };
             }
 
-            let n = number.parse::<u32>().unwrap();
+            let n = number.parse::<f32>().unwrap();
             tokens.push(Token::Number(n));
         } else if *char == '+' || *char == '-' || *char == '*' || *char == '/' || *char == '^' {
             tokens.push(Token::Operator(*char));

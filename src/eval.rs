@@ -7,6 +7,7 @@ pub fn eval(tokens: Vec<Token>) -> u32 {
     precedence.insert('-', 100);
     precedence.insert('*', 200);
     precedence.insert('/', 200);
+    precedence.insert('^', 230);
 
     let mut operators: Vec<char> = Vec::new();
     let mut operands: Vec<u32> = Vec::new();
@@ -30,6 +31,7 @@ pub fn eval(tokens: Vec<Token>) -> u32 {
                         '-' => operands.push(left - right),
                         '*' => operands.push(left * right),
                         '/' => operands.push(left / right),
+                        '^' => operands.push(left.pow(right)),
                         _ => (),
                     };
 
@@ -50,6 +52,7 @@ pub fn eval(tokens: Vec<Token>) -> u32 {
             '-' => operands.push(left - right),
             '*' => operands.push(left * right),
             '/' => operands.push(left / right),
+            '^' => operands.push(left.pow(right)),
             _ => (),
         };
     }

@@ -35,7 +35,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, &str> {
 
             let n = number.parse::<u32>().unwrap();
             tokens.push(Token::Number(n));
-        } else if *char == '+' || *char == '-' || *char == '*' || *char == '/' {
+        } else if *char == '+' || *char == '-' || *char == '*' || *char == '/' || *char == '^' {
             tokens.push(Token::Operator(*char));
         } else {
             result = Result::Err("Unknown character encountered");

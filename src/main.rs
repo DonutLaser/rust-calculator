@@ -31,6 +31,10 @@ fn main() {
             break;
         }
 
+        if input.is_empty() {
+            continue;
+        }
+
         let lex_result = lexer::tokenize(&input);
         if lex_result.is_none() {
             continue;

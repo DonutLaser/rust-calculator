@@ -2,6 +2,7 @@
 pub enum Token {
     Number(f32),
     Operator(char),
+    End,
 }
 
 pub fn tokenize(input: &str) -> Option<Vec<Token>> {
@@ -51,6 +52,8 @@ pub fn tokenize(input: &str) -> Option<Vec<Token>> {
 
         index += 1;
     }
+
+    tokens.push(Token::End);
 
     if !error {
         result = Option::Some(tokens);

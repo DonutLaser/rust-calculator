@@ -1,6 +1,7 @@
 use std::io::{stdin, stdout, Write};
 mod eval;
 mod lexer;
+mod parser;
 
 fn get_user_input() -> String {
     let mut buffer = String::new();
@@ -30,9 +31,17 @@ fn main() {
             break;
         }
 
-        if let Some(tokens) = lexer::tokenize(&input) {
-            let result = eval::eval(tokens);
-            println!("{}", result);
+        let lex_result = lexer::tokenize(&input);
+        if lex_result.is_none() {
+            continue;
         }
+
+        let parse_result = parser::parse(lex_result.unwrap());
+        if parse_result.is_none() {
+            continue;
+        }
+
+        let result = eval::eval(parse_result.unwrap());
+        println!("{}", result);
     }
 }

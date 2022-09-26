@@ -1,42 +1,31 @@
-use crate::lexer::Token;
-use std::collections::HashMap;
+use crate::parser::{Operator, ParsedToken};
 
-pub fn eval(tokens: Vec<Token>) -> f32 {
-    let mut precedence: HashMap<char, u8> = HashMap::new();
-    precedence.insert('+', 100);
-    precedence.insert('-', 100);
-    precedence.insert('*', 200);
-    precedence.insert('/', 200);
-    precedence.insert('^', 230);
+pub type Operation = (Operator, u16);
 
-    let mut operators: Vec<char> = Vec::new();
+pub fn eval(tokens: Vec<ParsedToken>) -> f32 {
+    let mut operators: Vec<Operation> = Vec::new();
     let mut operands: Vec<f32> = Vec::new();
 
     for token in tokens {
         match token {
-            Token::Number(n) => operands.push(n),
-            Token::Operator(c) => {
-                if operators.is_empty()
-                    || precedence.get(operators.last().unwrap()) < precedence.get(&c)
-                {
-                    operators.push(c);
-                } else {
+            ParsedToken::NumberLiteral(n) => operands.push(n),
+            ParsedToken::Operator(op, precedence) => {
+                if !operators.is_empty() && operators.last().unwrap().1 >= precedence {
                     let right = operands.pop().unwrap();
                     let left = operands.pop().unwrap();
 
                     let operator = operators.pop().unwrap();
 
-                    match operator {
-                        '+' => operands.push(left + right),
-                        '-' => operands.push(left - right),
-                        '*' => operands.push(left * right),
-                        '/' => operands.push(left / right),
-                        '^' => operands.push(left.powf(right)),
-                        _ => (),
+                    match operator.0 {
+                        Operator::Add => operands.push(left + right),
+                        Operator::Subtract => operands.push(left - right),
+                        Operator::Multiply => operands.push(left * right),
+                        Operator::Divide => operands.push(left / right),
+                        Operator::Power => operands.push(left.powf(right)),
                     };
-
-                    operators.push(c);
                 }
+
+                operators.push((op, precedence));
             }
         }
     }
@@ -47,13 +36,12 @@ pub fn eval(tokens: Vec<Token>) -> f32 {
 
         let operator = operators.pop().unwrap();
 
-        match operator {
-            '+' => operands.push(left + right),
-            '-' => operands.push(left - right),
-            '*' => operands.push(left * right),
-            '/' => operands.push(left / right),
-            '^' => operands.push(left.powf(right)),
-            _ => (),
+        match operator.0 {
+            Operator::Add => operands.push(left + right),
+            Operator::Subtract => operands.push(left - right),
+            Operator::Multiply => operands.push(left * right),
+            Operator::Divide => operands.push(left / right),
+            Operator::Power => operands.push(left.powf(right)),
         };
     }
 

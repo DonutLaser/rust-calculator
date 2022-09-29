@@ -102,7 +102,7 @@ pub fn tokenize(input: &str) -> Option<TokenList> {
 
             index -= 1;
         } else {
-            eprintln!("Error: unknown character encountered");
+            eprintln!("Error: unknown character encountered, {}", char);
             error = true;
             break;
         }
@@ -116,9 +116,3 @@ pub fn tokenize(input: &str) -> Option<TokenList> {
 
     result
 }
-
-// pub fn dump(tokens: &[Token]) {
-//     for token in tokens {
-//         println!("{:?}", token);
-//     }
-// }

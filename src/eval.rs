@@ -10,9 +10,7 @@ pub fn eval(expr: Expression) -> Option<f32> {
 
 fn eval_func(func: Function) -> Option<f32> {
     let value = eval(*func.argument);
-    if value.is_none() {
-        return None;
-    }
+    value?;
 
     let v = value.unwrap();
 

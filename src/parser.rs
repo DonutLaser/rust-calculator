@@ -109,7 +109,7 @@ fn parse_operand(tokens: &mut TokenList) -> Option<Expression> {
             }
         }
         _ => {
-            println!("Error: unexpected token, operand");
+            println!("Error: unexpected token {:?}", tokens.next().unwrap());
             None
         }
     }
@@ -122,7 +122,8 @@ fn parse_operator(tokens: &mut TokenList) -> Option<Operator> {
         return None;
     }
 
-    match next_token.unwrap() {
+    let t = next_token.unwrap();
+    match t {
         Token::Operator(op) => match op {
             '+' => Some(Operator::Add),
             '-' => Some(Operator::Subtract),
@@ -130,12 +131,12 @@ fn parse_operator(tokens: &mut TokenList) -> Option<Operator> {
             '/' => Some(Operator::Divide),
             '^' => Some(Operator::Power),
             _ => {
-                println!("Error: unexpected operator");
+                println!("Error: unexpected operator {}", op);
                 None
             }
         },
         _ => {
-            println!("Error: unexpected token");
+            println!("Error: unexpected token {:?}", t);
             None
         }
     }
@@ -147,8 +148,6 @@ fn parse_identifier(tokens: &mut TokenList) -> Option<Expression> {
 }
 
 fn parse_function(tokens: &mut TokenList) -> Option<Function> {
-    println!("Parse function");
-
     let mut next_token = tokens.next();
     if next_token.is_none() {
         println!("Error: unexpected end of expression");

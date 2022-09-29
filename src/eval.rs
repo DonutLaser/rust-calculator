@@ -1,49 +1,49 @@
-use crate::parser::{Operator, ParsedToken};
+use crate::parser::{BinaryOperation, Expression, Function, Operator};
 
-pub type Operation = (Operator, u16);
+pub fn eval(expr: Expression) -> Option<f32> {
+    match expr {
+        Expression::NumberLiteral(n) => Some(n),
+        Expression::FunctionCall(func) => eval_func(func),
+        Expression::BinaryOp(op) => eval_binary_operation(op),
+    }
+}
 
-pub fn eval(tokens: Vec<ParsedToken>) -> f32 {
-    let mut operators: Vec<Operation> = Vec::new();
-    let mut operands: Vec<f32> = Vec::new();
+fn eval_func(func: Function) -> Option<f32> {
+    let value = eval(*func.argument);
+    if value.is_none() {
+        return None;
+    }
 
-    for token in tokens {
-        match token {
-            ParsedToken::NumberLiteral(n) => operands.push(n),
-            ParsedToken::Operator(op, precedence) => {
-                if !operators.is_empty() && operators.last().unwrap().1 >= precedence {
-                    let right = operands.pop().unwrap();
-                    let left = operands.pop().unwrap();
+    let v = value.unwrap();
 
-                    let operator = operators.pop().unwrap();
-
-                    match operator.0 {
-                        Operator::Add => operands.push(left + right),
-                        Operator::Subtract => operands.push(left - right),
-                        Operator::Multiply => operands.push(left * right),
-                        Operator::Divide => operands.push(left / right),
-                        Operator::Power => operands.push(left.powf(right)),
-                    };
-                }
-
-                operators.push((op, precedence));
-            }
+    match func.name.as_str() {
+        "abs" => Some(v.abs()),
+        "sin" => Some(v.sin()),
+        "cos" => Some(v.cos()),
+        "sqrt" => Some(v.sqrt()),
+        _ => {
+            println!("Error: unknown function");
+            None
         }
     }
+}
 
-    while !operators.is_empty() {
-        let right = operands.pop().unwrap();
-        let left = operands.pop().unwrap();
+fn eval_binary_operation(op: BinaryOperation) -> Option<f32> {
+    let left = eval(*op.left);
+    let right = eval(*op.right);
 
-        let operator = operators.pop().unwrap();
-
-        match operator.0 {
-            Operator::Add => operands.push(left + right),
-            Operator::Subtract => operands.push(left - right),
-            Operator::Multiply => operands.push(left * right),
-            Operator::Divide => operands.push(left / right),
-            Operator::Power => operands.push(left.powf(right)),
-        };
+    if left.is_none() || right.is_none() {
+        return None;
     }
 
-    *operands.get(0).unwrap()
+    let lhs = left.unwrap();
+    let rhs = right.unwrap();
+
+    match op.operator {
+        Operator::Add => Some(lhs + rhs),
+        Operator::Subtract => Some(lhs - rhs),
+        Operator::Multiply => Some(lhs * rhs),
+        Operator::Divide => Some(lhs / rhs),
+        Operator::Power => Some(lhs.powf(rhs)),
+    }
 }

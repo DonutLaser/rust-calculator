@@ -35,17 +35,21 @@ fn main() {
             continue;
         }
 
-        let lex_result = lexer::tokenize(&input);
-        if lex_result.is_none() {
+        let tokens_list = lexer::tokenize(&input);
+        if tokens_list.is_none() {
             continue;
         }
 
-        let parse_result = parser::parse(lex_result.unwrap());
-        if parse_result.is_none() {
+        let expression = parser::parse(&mut tokens_list.unwrap());
+        if expression.is_none() {
             continue;
         }
 
-        let result = eval::eval(parse_result.unwrap());
-        println!("{}", result);
+        let result = eval::eval(expression.unwrap());
+        if result.is_none() {
+            continue;
+        }
+
+        println!("{}", result.unwrap());
     }
 }

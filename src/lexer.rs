@@ -1,12 +1,46 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Token {
     Number(f32),
     Operator(char),
-    End,
+    Identifier(String),
+    LParen,
+    RParen,
 }
 
-pub fn tokenize(input: &str) -> Option<Vec<Token>> {
-    let mut result: Option<Vec<Token>> = Option::None;
+pub struct TokenList {
+    data: Vec<Token>,
+    cursor: usize,
+}
+
+impl TokenList {
+    pub fn new(data: Vec<Token>) -> Self {
+        TokenList { data, cursor: 0 }
+    }
+
+    pub fn next(&mut self) -> Option<Token> {
+        if self.cursor == self.data.len() {
+            None
+        } else {
+            let token = self.data.get(self.cursor).unwrap();
+            self.cursor += 1;
+            Some(token.clone())
+        }
+    }
+
+    pub fn peek(&self, step: Option<usize>) -> Option<Token> {
+        let stepby = step.unwrap_or(0);
+
+        if self.cursor + stepby >= self.data.len() {
+            None
+        } else {
+            let token = self.data.get(self.cursor + stepby).unwrap();
+            Some(token.clone())
+        }
+    }
+}
+
+pub fn tokenize(input: &str) -> Option<TokenList> {
+    let mut result: Option<TokenList> = Option::None;
     let mut tokens: Vec<Token> = Vec::new();
 
     let chars: Vec<char> = input.chars().collect();
@@ -42,8 +76,31 @@ pub fn tokenize(input: &str) -> Option<Vec<Token>> {
                     break;
                 }
             }
+
+            index -= 1;
         } else if *char == '+' || *char == '-' || *char == '*' || *char == '/' || *char == '^' {
             tokens.push(Token::Operator(*char));
+        } else if *char == '(' {
+            tokens.push(Token::LParen);
+        } else if *char == ')' {
+            tokens.push(Token::RParen);
+        } else if char.is_ascii_alphabetic() {
+            let mut ident = String::new();
+
+            let mut next_char = chars.get(index).unwrap();
+            while next_char.is_ascii_alphabetic() {
+                ident.push(*next_char);
+
+                index += 1;
+                next_char = match chars.get(index) {
+                    Some(c) => c,
+                    None => &'\0',
+                };
+            }
+
+            tokens.push(Token::Identifier(ident));
+
+            index -= 1;
         } else {
             eprintln!("Error: unknown character encountered");
             error = true;
@@ -53,10 +110,8 @@ pub fn tokenize(input: &str) -> Option<Vec<Token>> {
         index += 1;
     }
 
-    tokens.push(Token::End);
-
     if !error {
-        result = Option::Some(tokens);
+        result = Option::Some(TokenList::new(tokens));
     }
 
     result

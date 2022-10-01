@@ -7,6 +7,7 @@ pub enum Token {
     RParen,
 }
 
+#[derive(Debug)]
 pub struct TokenList {
     data: Vec<Token>,
     cursor: usize,

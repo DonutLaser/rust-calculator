@@ -10,6 +10,11 @@ pub enum Operator {
 }
 
 #[derive(Debug)]
+pub enum Constant {
+    PI,
+}
+
+#[derive(Debug)]
 pub struct BinaryOperation {
     pub operator: Operator,
     pub left: Box<Expression>,
@@ -25,6 +30,7 @@ pub struct Function {
 #[derive(Debug)]
 pub enum Expression {
     NumberLiteral(f32),
+    Constant(Constant),
     BinaryOp(BinaryOperation),
     FunctionCall(Function),
 }
@@ -89,7 +95,7 @@ pub fn parse(tokens: &mut TokenList) -> Option<Expression> {
 fn parse_operand(tokens: &mut TokenList) -> Option<Expression> {
     let next_token = tokens.peek(None);
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
@@ -109,7 +115,7 @@ fn parse_operand(tokens: &mut TokenList) -> Option<Expression> {
             }
         }
         _ => {
-            println!("Error: unexpected token {:?}", tokens.next().unwrap());
+            eprintln!("Error: unexpected token {:?}", tokens.next().unwrap());
             None
         }
     }
@@ -118,7 +124,7 @@ fn parse_operand(tokens: &mut TokenList) -> Option<Expression> {
 fn parse_operator(tokens: &mut TokenList) -> Option<Operator> {
     let next_token = tokens.next();
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
@@ -131,50 +137,62 @@ fn parse_operator(tokens: &mut TokenList) -> Option<Operator> {
             '/' => Some(Operator::Divide),
             '^' => Some(Operator::Power),
             _ => {
-                println!("Error: unexpected operator {}", op);
+                eprintln!("Error: unexpected operator {}", op);
                 None
             }
         },
         _ => {
-            println!("Error: unexpected token {:?}", t);
+            eprintln!("Error: unexpected token {:?}", t);
             None
         }
     }
 }
 
 fn parse_identifier(tokens: &mut TokenList) -> Option<Expression> {
-    // For now there aren't any identifiers that are not functions
-    parse_function(tokens).map(Expression::FunctionCall)
+    let next_token = tokens.peek(None);
+
+    if let Token::Identifier(ident) = next_token.unwrap() {
+        match ident.as_str() {
+            "PI" => {
+                _ = tokens.next();
+                Some(Expression::Constant(Constant::PI))
+            }
+            _ => parse_function(tokens).map(Expression::FunctionCall),
+        }
+    } else {
+        eprintln!("Error: expected identifier");
+        None
+    }
 }
 
 fn parse_function(tokens: &mut TokenList) -> Option<Function> {
     let mut next_token = tokens.next();
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
     let name = if let Token::Identifier(ident) = next_token.unwrap() {
         ident
     } else {
-        println!("Error: expected identifier");
+        eprintln!("Error: expected identifier");
         return None;
     };
 
     next_token = tokens.next();
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
     if !matches!(next_token.unwrap(), Token::LParen) {
-        println!("Error: expected '('");
+        eprintln!("Error: expected '('");
         return None;
     }
 
     next_token = tokens.peek(None);
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
@@ -183,7 +201,7 @@ fn parse_function(tokens: &mut TokenList) -> Option<Function> {
 
     next_token = tokens.next();
     if next_token.is_none() {
-        println!("Error: unexpected end of expression");
+        eprintln!("Error: unexpected end of expression");
         return None;
     }
 
@@ -193,7 +211,7 @@ fn parse_function(tokens: &mut TokenList) -> Option<Function> {
             argument: Box::new(arg),
         })
     } else {
-        println!("Error: expected ')'");
+        eprintln!("Error: expected ')'");
         None
     }
 }

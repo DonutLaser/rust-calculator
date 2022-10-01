@@ -1,8 +1,10 @@
-use crate::parser::{BinaryOperation, Expression, Function, Operator};
+use crate::parser::{BinaryOperation, Constant, Expression, Function, Operator};
+use std::f64::consts::PI;
 
 pub fn eval(expr: Expression) -> Option<f32> {
     match expr {
         Expression::NumberLiteral(n) => Some(n),
+        Expression::Constant(c) => eval_constant(c),
         Expression::FunctionCall(func) => eval_func(func),
         Expression::BinaryOp(op) => eval_binary_operation(op),
     }
@@ -23,6 +25,12 @@ fn eval_func(func: Function) -> Option<f32> {
             println!("Error: unknown function");
             None
         }
+    }
+}
+
+fn eval_constant(constant: Constant) -> Option<f32> {
+    match constant {
+        Constant::PI => Some(PI as f32),
     }
 }
 
